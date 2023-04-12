@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xmlns:http="http://www.mulesoft.org/schema/mule/http"
+	xmlns="http://www.mulesoft.org/schema/mule/core"
+	xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+	<http:listener-config name="HTTP_Listener_config" doc:name="HTTP Listener config" doc:id="1e39a6ec-6bfa-4b53-a69e-6389b9f509c1" >
+		<http:listener-connection host="0.0.0.0" port="8081" />
+	</http:listener-config>
+	<http:request-config name="HTTP_Request_configuration" doc:name="HTTP Request configuration" doc:id="398e4733-931f-42e6-abb4-6f7b4d6ca515" >
+		<http:request-connection host="localhost" port="8081" />
+	</http:request-config>
+	<configuration doc:name="Configuration" doc:id="7a9a71aa-0c0b-4b86-83b8-bfef8be97276" defaultErrorHandler-ref="commom-errorError_Handler" />
+	<flow name="errorhandlingFlow" doc:id="3f99ccc2-f6f0-47b6-b6d2-88e6c53adcd0" >
+		<http:listener doc:name="Listener" doc:id="c162bb2c-22ea-4ec1-b60b-ffb8cbb92503" config-ref="HTTP_Listener_config" path="/error1">
+		</http:listener>
+		<set-payload value='#["Before Request"]' doc:name="Before Request" doc:id="ddc878c1-3513-49fa-9dae-896528755bae" />
+		<flow-ref doc:name="Flow Reference" doc:id="884cd5fc-535b-4408-90e3-e0f8cee5999f" name="errorhandlingFlow1"/>
+		<set-payload value='#["After Request"]' doc:name="After Request" doc:id="ca9e67d6-be9b-4fea-8507-905f8081bc27" />
+		<error-handler>
+			<on-error-propagate enableNotifications="true" logException="true" doc:name="On Error Propagate" doc:id="895f217e-9214-49a8-ac67-8745097ba281" type="ANY">
+				<ee:transform doc:name="Transform Message" doc:id="70c203c8-811b-445a-8276-46c4a7a5b384" >
+					<ee:message >
+						<ee:set-payload ><![CDATA[%dw 2.0
+output application/java
+---
+"main flow"]]></ee:set-payload>
+					</ee:message>
+				</ee:transform>
+			</on-error-propagate>
+		</error-handler>
+	</flow>
+	<flow name="errorhandlingFlow1" doc:id="d1f1d0f3-ced1-4b4d-9f8f-b2b3ed6fd567" >
+		<try doc:name="Try" doc:id="10f5516e-43bf-4741-9273-4ae4f38d9690" >
+			<until-successful maxRetries="3" doc:name="Until Successful" doc:id="facf6d14-ca87-43f4-a815-b0d5b4bcb69d" millisBetweenRetries="6000">
+				<http:request method="GET" doc:name="Request" doc:id="22672dba-7671-44a1-ba1a-50d234e0f4d8" config-ref="HTTP_Request_configuration" path="/ffm,,">
+			</http:request>
+			</until-successful>
+			<ee:transform doc:name="Transform Message" doc:id="099a8094-fbb0-48f0-bec3-5514a97119b8" >
+				<ee:message >
+					<ee:set-payload ><![CDATA[%dw 2.0
+output application/java
+---"in try"]]></ee:set-payload>
+				</ee:message>
+			</ee:transform>
+			<error-handler>
+				<on-error-propagate enableNotifications="true" logException="true" doc:name="On Error Propagate" doc:id="adb86ebf-8919-4795-80a3-52b0e1068c58" >
+					<ee:transform doc:name="Transform Message" doc:id="091a1273-9e4e-489e-9c07-f226836dff48">
+						<ee:message>
+							<ee:set-payload><![CDATA[%dw 2.0
+output application/java
+---
+"try on error prop"]]></ee:set-payload>
+						</ee:message>
+					</ee:transform>
+				</on-error-propagate>
+			</error-handler>
+		</try>
+		<ee:transform doc:name="Transform Message" doc:id="8bc1a7ef-1102-4497-a4d0-a8b10892250a" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+"private flow"]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+	</flow>
+	<flow name="errorhandlingFlow2" doc:id="c3fb7809-dd87-47ae-89df-11813c2adea1" >
+		<set-payload value='#["london"]' doc:name="Set Payload" doc:id="5e121209-369a-4401-ac9e-143be0c8a23b" />
+		<raise-error doc:name="Raise error" doc:id="2d2fb792-e06a-431d-ac75-dbef10f603cd" type="GONE:CASE" description="I am raising an error"/>
+		<ee:transform doc:name="Transform Message" doc:id="9cf29005-576f-4b96-9454-4044640af30c" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/java
+---
+"flow2"]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+	</flow>
+</mule>

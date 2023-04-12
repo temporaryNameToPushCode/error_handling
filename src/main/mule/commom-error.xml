@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xmlns="http://www.mulesoft.org/schema/mule/core"
+	xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+	<error-handler name="commom-errorError_Handler" doc:id="2820d862-b013-445d-8048-758c81844a32" >
+		<on-error-continue enableNotifications="true" logException="true" doc:name="On Error Continue" doc:id="d1fd2b7f-b872-4be0-9082-450eef34eec7" type="GONE:CASE">
+			<ee:transform doc:name="Transform Message" doc:id="0a849de1-3bfa-4bdb-a5af-ffb67725ede6" >
+				<ee:message >
+					<ee:set-payload ><![CDATA[%dw 2.0
+output application/java
+---
+"GLOBAL"]]></ee:set-payload>
+				</ee:message>
+			</ee:transform>
+		</on-error-continue>
+		<on-error-propagate enableNotifications="true" logException="true" doc:name="On Error Propagate" doc:id="c4b22ad8-408f-40c2-8977-a03ac400caa4" type="ANY">
+			<ee:transform doc:name="Transform Message" doc:id="d350cbb6-67a3-4c37-9d15-e4df6404b002" >
+				<ee:message >
+					<ee:set-payload ><![CDATA[%dw 2.0
+output application/java
+---
+"GLOBAL ON ERROR PROP"]]></ee:set-payload>
+				</ee:message>
+			</ee:transform>
+		</on-error-propagate>
+	</error-handler>
+</mule>
